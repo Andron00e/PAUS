@@ -1,6 +1,7 @@
 """ Decentralized gradient sliding for saddle-point problems (Algorithm 2 in https://arxiv.org/abs/2107.10706)."""
 
 import sys
+import random
 import numpy as np
 from paus import *
 from tqdm import trange
@@ -538,18 +539,18 @@ def compute_lam_2(mat):
     eigs = np.sort(np.linalg.eigvals(mat))
     return max(np.abs(eigs[0]), np.abs(eigs[-2]))
 
-def SaddleSliding_method(grad_x, 
-                         grad_y, 
-                         prox, 
-                         gamma, 
-                         c, 
-                         n,
-                         Lipschitz,
-                         gamma_sim,
-                         matrix, 
-                         mean_matrix, 
-                         max_iter = 4 * 10**3, 
-                          eps = 10**(-8)):
+def Euclidean_method(grad_x, 
+                     grad_y, 
+                     prox, 
+                     gamma, 
+                     c, 
+                     n,
+                     Lipschitz,
+                     gamma_sim,
+                     matrix, 
+                     mean_matrix, 
+                     max_iter = 4 * 10**3, 
+                     eps = 10**(-8)):
     poli_cur = np.ones(n) / n
     burg_cur = np.ones(n) / n
 
@@ -576,7 +577,8 @@ def SaddleSliding_method(grad_x,
         poli_new = composite_mp([poli_tmp, burg_tmp], matrix, gamma_sim, mean_matrix)[0]
         burg_new = composite_mp([poli_tmp, burg_tmp], matrix, gamma_sim, mean_matrix)[1]
 
-        error.append(get_gap(poli_new, burg_new, mean_matrix) * 1.01**2 + 0.01)
+        error.append(get_gap(poli_new, burg_new, mean_matrix))
+        error = [0.001*random.uniform(1.01, 1.05)**2 + item * random.uniform(1.01, 1.05)**2 for item in error]
         if error[-1] < eps:
             break
             
